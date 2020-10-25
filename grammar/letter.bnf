@@ -1,0 +1,624 @@
+/**
+ * Letter programming language.
+ *
+ * LR parsing grammar
+ *
+ * Course info: http://dmitrysoshnikov.com/courses/essentials-of-parsing/
+ *
+ * (C) 2020-present Dmitry Soshnikov <dmitry.soshnikov@gmail.com>
+ */
+
+// --------------------------------
+// Lexical grammar
+
+%lex
+
+%%
+
+\/\/.*            /* skip comments */
+\/\*(.|\s)*\*\/   /* skip comments */
+
+\s+               /* skip whitespace */
+
+\"[^\"]*\"        return 'STRING'
+
+// --------------------------------
+// Keywords
+
+\bdef\b           return 'DEF'
+\breturn\b        return 'RETURN'
+\bif\b            return 'IF'
+\belse\b          return 'ELSE'
+\blet\b           return 'LET'
+\bwhile\b         return 'WHILE'
+\bdo\b            return 'DO'
+\bfor\b           return 'FOR'
+
+\bclass\b         return 'CLASS'
+\bextends\b       return 'EXTENDS'
+\bsuper\b         return 'SUPER'
+\bnew\b           return 'NEW'
+\bthis\b          return 'THIS'
+
+\btrue\b          return 'TRUE'
+\bfalse\b         return 'FALSE'
+\bnull\b          return 'NULL'
+
+// ------------------------------------------------
+// Numbers.
+
+\d+               return 'NUMBER'
+\w+               return 'IDENTIFIER'
+
+// ------------------------------------------------
+// Logical operators: &&, ||
+
+\|\|              return 'LOGICAL_OR'
+\&\&              return 'LOGICAL_AND'
+
+// ------------------------------------------------
+// Equality operators: ==, !=
+
+[\=!]\=           return 'EQUALITY_OPERATOR'
+[><]\=?           return 'RELATIONAL_OPERATOR'
+
+// ------------------------------------------------
+// Assignment operators: =, *=, /=, +=, -=,
+
+\=                return 'SIMPLE_ASSIGN'
+[*/\+\-]\=        return 'COMPLEX_ASSIGN'
+
+// ------------------------------------------------
+// Relational operators: >, >=, <, <=
+
+[+\-]             return 'ADDITIVE_OPERATOR'
+[*/]              return 'MULTIPLICATIVE_OPERATOR'
+
+/lex
+
+// --------------------------------
+// Module include
+
+%{
+
+// Code included "as is"
+
+/**
+ * Creates generic binary expression node.
+ */
+function BinaryExpression(left, operator, right) {
+  return {
+    type: 'BinaryExpression',
+    operator,
+    left,
+    right,
+  };
+}
+
+/**
+ * Creates logical expression node.
+ */
+function LogicalExpression(left, operator, right) {
+  // Implement here...
+}
+
+/**
+ * Creates an unary expression node.
+ */
+function UnaryExpression(operator, argument) {
+  // Implement here...
+}
+
+/**
+ * Creates an MemberExpression node.
+ */
+function MemberExpression(object, property) {
+  // Implement here...
+}
+
+/**
+ * Creates an CallExpression node.
+ */
+function CallExpression(callee, args) {
+  // Implement here...
+}
+
+/**
+ * Creates a literal node.
+ */
+function Literal(namePrefix, value) {
+  return {
+    type: `${namePrefix}Literal`,
+    value,
+  };
+}
+
+/**
+ * Creates an If-statement node.
+ */
+function IfStatement(test, consequent, alternate) {
+  return {
+    type: 'IfStatement',
+    test,
+    consequent,
+    alternate,
+  };
+}
+
+%}
+
+/**
+ * The `THEN` precedence is lower, than of `ELSE`, so
+ * no shift-reduce conflict, and no "dangling-else" problem.
+ */
+%nonassoc THEN
+%nonassoc ELSE
+
+// --------------------------------
+// Syntactic grammar
+
+%%
+
+/**
+ * Main Program.
+ */
+Program
+  : StatementList
+    {
+      $$ = {
+        type: 'Program',
+        body: $1,
+      }
+    }
+  ;
+
+/**
+ * List of statements.
+ */
+StatementList
+  : Statement
+    { $$ = [$1] }
+  | StatementList Statement
+    { $1.push($2); $$ = $1 }
+  ;
+
+/**
+ * Supported statements.
+ */
+Statement
+  : ExpressionStatement
+  | EmptyStatement
+  | BlockStatement
+  | FunctionDeclaration
+  | ReturnStatement
+  | IfStatement
+  | VariableStatement
+  | IterationStatement
+  | ClassDeclaration
+  ;
+
+/**
+ * Class declaration.
+ */
+ClassDeclaration
+  : // Implement here...
+  ;
+
+/**
+ * Optional class extends.
+ */
+OptClassExtends
+  : ClassExtends
+  | /* empty */
+    { $$ = null }
+  ;
+
+/**
+ * Class extends.
+ */
+ClassExtends
+  : EXTENDS Identifier
+    { $$ = $2 }
+  ;
+
+/**
+ * Iteration stement: while, do, for.
+ */
+IterationStatement
+  : WhileStatement
+  /* TODO: DoWhileStatement */
+  /* TODO: ForStatement */
+  ;
+
+/**
+ * While loop.
+ */
+WhileStatement
+  : // Implement here...
+  ;
+
+/**
+ * Variable statement.
+ */
+VariableStatement
+  : // Implement here...
+  ;
+
+/**
+ * List of variable declarations.
+ */
+VariableDeclarationList
+  : // Implement here...
+  ;
+
+/**
+ * Variable declaration.
+ */
+VariableDeclaration
+  : // Implement here...
+  ;
+
+/**
+ * Optional variable initializer.
+ */
+OptVariableInitializer
+  : VariableInitializer
+  | /* empty */
+    { $$ = null }
+  ;
+
+/**
+ * Variable initializer.
+ */
+VariableInitializer
+  : SIMPLE_ASSIGN AssignmentExpression
+    { $$ = $2 }
+  ;
+
+/**
+ * If statement.
+ */
+IfStatement
+  : // Implement here...
+  ;
+
+/**
+ * Function declaration.
+ */
+FunctionDeclaration
+  : // Implement here...
+  ;
+
+/**
+ * Identifier (variables, properties).
+ */
+Identifier
+  : // Implement here...
+  ;
+
+/**
+ * Optional list of parameters.
+ */
+OptFormalParameterList
+  : FormalParameterList
+  | /* empty */
+    { $$ = [] }
+  ;
+
+/**
+ * Formal parameters.
+ */
+FormalParameterList
+  : // Implement here...
+  ;
+
+/**
+ * Return statement.
+ */
+ReturnStatement
+  : // Implement here...
+  ;
+
+/**
+ * Optional expression.
+ */
+OptExpression
+  : Expression
+  | /* empty */
+    { $$ = null }
+  ;
+
+/**
+ * Expression statement.
+ */
+ExpressionStatement
+  : Expression ';'
+    {
+      $$ = {
+        type: 'ExpressionStatement',
+        expression: $1,
+      }
+    }
+  ;
+
+/**
+ * Empty statement.
+ */
+EmptyStatement
+  : // Implement here...
+  ;
+
+/**
+ * Block statement: { }
+ */
+BlockStatement
+  : // Implement here...
+  ;
+
+/**
+ * Optional list of statements.
+ */
+OptStatementList
+  : StatementList
+  | /* empty */
+    { $$ = [] }
+  ;
+
+/**
+ * Basic expression.
+ */
+Expression
+  : AssignmentExpression
+  ;
+
+/**
+ * Assignment expression.
+ *
+ * AssignmentOperator: =, *=, /=, +=, -=,
+ *
+ * x = y
+ * x *= y
+ * x /= y
+ * x += y
+ * x -= y
+ */
+AssignmentExpression
+  : // Implement here...
+  ;
+
+/**
+ * Left-hand side expression.
+ *
+ * foo = 10;
+ * foo['bar'] = 10;
+ * foo[0] = 10;
+ * foo.bar = 20;
+ * foo.bar.baz;
+ */
+LeftHandSideExpression
+  : MemberExpression
+  ;
+
+/**
+ * MemberExpression.
+ */
+MemberExpression
+  : // Implement here...
+  ;
+
+/**
+ * This expression.
+ */
+ThisExpression
+  : // Implement here...
+  ;
+
+/**
+ * AssignmentOperator: =, *=, /=, +=, -=.
+ */
+AssignmentOperator
+  : SIMPLE_ASSIGN
+  | COMPLEX_ASSIGN
+  ;
+
+/**
+ * Logical OR expression.
+ *
+ * x || y
+ */
+LogicalORExpression
+  : // Implement here...
+  ;
+
+/**
+ * Logical AND expression.
+ *
+ * x && y
+ */
+LogicalANDExpression
+  : // Implement here...
+  ;
+
+/**
+ * Equality expressions.
+ *
+ * EQUALITY_OPERATOR: ==, !=
+ *
+ * x == y
+ * x != y
+ */
+EqualityExpression
+  : // Implement here...
+  ;
+
+/**
+ * Relational expressions.
+ *
+ * RELATIONAL_OPERATOR: >, >=, <, <=
+ *
+ * x > y
+ * x >= y
+ * x < y
+ * x <= y
+ */
+RelationalExpression
+  : // Implement here...
+  ;
+
+/**
+ * Additive expressions.
+ *
+ * ADDITIVE_OPERATOR: +, -
+ *
+ * x + y
+ * x - y
+ */
+AdditiveExpression
+  : // Implement here...
+  ;
+
+/**
+ * Multiplicative expression.
+ *
+ * MULTIPLICATIVE_OPERATOR: *, /
+ *
+ * x * y
+ * x / y
+ */
+MultiplicativeExpression
+  : // Implement here...
+  ;
+
+/**
+ * Unary expression.
+ *
+ * -x
+ * +10
+ * -foo();
+ */
+UnaryExpression
+  : // Implement here...
+  ;
+
+/**
+ * CallExpression.
+ *
+ * foo();
+ * bar()();
+ * super();
+ */
+CallExpression
+  : // Implement here...
+  ;
+
+/**
+ * Super expression.
+ */
+Super
+  : // Implement here...
+  ;
+
+/**
+ * Callee.
+ *
+ * Simple function call `foo();` or chained `foo()();`.
+ */
+Callee
+  : // Implement here...
+  ;
+
+/**
+ * Arguments of function calls.
+ */
+Arguments
+  : // Implement here...
+  ;
+
+/**
+ * Optional list of arguments.
+ */
+OptArgumentList
+  : ArgumentList
+  | /* empty */
+    { $$ = [] }
+  ;
+
+/**
+ * List of function arguments.
+ */
+ArgumentList
+  : AssignmentExpression
+    { $$ = [$1] }
+  | ArgumentList ',' AssignmentExpression
+    { $1.push($3); $$ = $1 }
+  ;
+
+/**
+ * Primary expression.
+ */
+PrimaryExpression
+  : // Implement here...
+  ;
+
+/**
+ * New expression.
+ *
+ * new Point();
+ * new Module.Point();
+ */
+NewExpression
+  : // Implement here...
+  ;
+
+/**
+ * Literal node.
+ */
+Literal
+  : NumericLiteral
+  | StringLiteral
+  | TrueLiteral
+  | FalseLiteral
+  | NullLiteral
+  ;
+
+/**
+ * True literal node: true.
+ */
+TrueLiteral
+  : TRUE { $$ = Literal('Boolean', true) }
+  ;
+
+/**
+ * False literal node: false.
+ */
+FalseLiteral
+  : FALSE { $$ = Literal('Boolean', false) }
+  ;
+
+/**
+ * Null literal node: null.
+ */
+NullLiteral
+  : NULL { $$ = Literal('Null', null) }
+  ;
+
+/**
+ * Numeric literal node: 10, 20.
+ */
+NumericLiteral
+  : NUMBER { $$ = Literal('Numeric', Number($1)) }
+  ;
+
+/**
+ * String literal node: "hello", "world".
+ */
+StringLiteral
+  : STRING { $$ = Literal('String', $1.slice(1, -1)) }
+  ;
+
+/**
+ * Parenthesized expression: (x + 1)
+ */
+ParenthesizedExpression
+  : '(' Expression ')' { $$ = $2 }
+  ;

@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+
+/**
+ * Essentials of Parsing.
+ *
+ * Course info: http://dmitrysoshnikov.com/courses/essentials-of-parsing/
+ *
+ * (C) 2020-present Dmitry Soshnikov <dmitry.soshnikov@gmail.com>
+ */
+
+'use strict';
+
+const fs = require('fs');
+
+const letterParser = require('../generated/letter-parser');
+
+function main(argv) {
+  const [_node, _path, mode, exp] = argv;
+
+  let ast = null;
+
+  // Direct expression:
+
+  if (mode === '-e') {
+    ast = letterParser.parse(exp);
+  }
+
+  // Eva file:
+
+  if (mode === '-f') {
+    const src = fs.readFileSync(exp, 'utf-8');
+    ast = letterParser.parse(src);
+  }
+
+  console.log(JSON.stringify(ast, null, 2));
+}
+
+main(process.argv);

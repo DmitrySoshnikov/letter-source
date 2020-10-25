@@ -1,0 +1,68 @@
+/**
+ * Essentials of Parsing.
+ *
+ * Course info: http://dmitrysoshnikov.com/courses/essentials-of-parsing/
+ *
+ * (C) 2020-present Dmitry Soshnikov <dmitry.soshnikov@gmail.com>
+ */
+
+class Point {
+  def constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  
+  def getX() {
+    return this.x;
+  }
+
+  def getY() {
+    return this.y;
+  }
+}
+
+class Point3D extends Point {
+  def constructor(x, y, z) {
+    super(x, y);
+    this.z = z;
+  }
+
+  def getZ() {
+    return this.z;
+  }
+}
+
+let p = new Point3D(10, 20, 30);
+
+/*
+
+What's next?
+
+1. Arrow functions (Lambda functions)
+
+  let foo = (x, y) => {
+    return x * y;
+  };
+
+2. Shorthands:
+
+  i++;
+  i--;
+
+3. Modules:
+
+  module Math {
+    def square(x) {
+      return x * x;
+    }
+  }
+
+4. Async functions
+
+  def async processFile(...) {
+    ...
+  }
+
+  await processFile(...);
+
+*/

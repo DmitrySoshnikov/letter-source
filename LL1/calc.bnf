@@ -1,0 +1,48 @@
+/**
+ * Essentials of Parsing.
+ *
+ * Course info: http://dmitrysoshnikov.com/courses/essentials-of-parsing/
+ *
+ * (C) 2020-present Dmitry Soshnikov <dmitry.soshnikov@gmail.com>
+ */
+
+// --------------------------------
+// Lexical:
+
+%lex
+
+%%
+
+\s+     /* skip whitespace */
+
+\d+     return 'number'
+
+/lex
+
+// --------------------------------
+// BNF:
+
+%%
+
+E
+  : T E'
+  ;
+
+E'
+  : '+' T E'
+  |
+  ;
+
+T
+  : F T'
+  ;
+
+T'
+  : '*' F T'
+  |
+  ;
+
+F
+  : number
+  | '(' E ')'
+  ;
