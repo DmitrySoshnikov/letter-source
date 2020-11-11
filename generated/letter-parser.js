@@ -280,7 +280,7 @@ const lexRules = [[/^\(/, function() { return "'('"; }],
 [/^\[/, function() { return "'['"; }],
 [/^\]/, function() { return "']'"; }],
 [/^\/\/.*/, function() { /* skip comments */ }],
-[/^\/\*(.|\s)*\*\//, function() { /* skip comments */ }],
+[/^\/\*[\s\S]*?\*\//, function() { /* skip comments */ }],
 [/^\s+/, function() { /* skip whitespace */ }],
 [/^"[^\"]*"/, function() { return 'STRING' }],
 [/^\bdef\b/, function() { return 'DEF' }],
@@ -750,6 +750,9 @@ const yyparse = {
 
 // Code included "as is"
 
+/**
+ * Creates generic binary expression node.
+ */
 function BinaryExpression(left, operator, right) {
   return {
     type: 'BinaryExpression',
@@ -759,6 +762,9 @@ function BinaryExpression(left, operator, right) {
   };
 }
 
+/**
+ * Creates logical expression node.
+ */
 function LogicalExpression(left, operator, right) {
   return {
     type: 'LogicalExpression',
@@ -768,6 +774,9 @@ function LogicalExpression(left, operator, right) {
   };
 }
 
+/**
+ * Creates an unary expression node.
+ */
 function UnaryExpression(operator, argument) {
   return {
     type: 'UnaryExpression',
@@ -776,6 +785,9 @@ function UnaryExpression(operator, argument) {
   };
 }
 
+/**
+ * Creates an MemberExpression node.
+ */
 function MemberExpression(object, property) {
   return {
     type: 'MemberExpression',
@@ -784,6 +796,9 @@ function MemberExpression(object, property) {
   };
 }
 
+/**
+ * Creates an CallExpression node.
+ */
 function CallExpression(callee, args) {
   return {
     type: 'CallExpression',
@@ -792,6 +807,9 @@ function CallExpression(callee, args) {
   }
 }
 
+/**
+ * Creates a literal node.
+ */
 function Literal(namePrefix, value) {
   return {
     type: `${namePrefix}Literal`,
@@ -799,6 +817,9 @@ function Literal(namePrefix, value) {
   };
 }
 
+/**
+ * Creates an If-statement node.
+ */
 function IfStatement(test, consequent, alternate) {
   return {
     type: 'IfStatement',

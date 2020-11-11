@@ -11,7 +11,7 @@ class Point {
     this.x = x;
     this.y = y;
   }
-  
+
   def getX() {
     return this.x;
   }
