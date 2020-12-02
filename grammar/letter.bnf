@@ -60,6 +60,10 @@
 // Equality operators: ==, !=
 
 [\=!]\=           return 'EQUALITY_OPERATOR'
+
+// ------------------------------------------------
+// Relational operators: >, >=, <, <=
+
 [><]\=?           return 'RELATIONAL_OPERATOR'
 
 // ------------------------------------------------
@@ -69,7 +73,7 @@
 [*/\+\-]\=        return 'COMPLEX_ASSIGN'
 
 // ------------------------------------------------
-// Relational operators: >, >=, <, <=
+// Math operators: +, -, *, /
 
 [+\-]             return 'ADDITIVE_OPERATOR'
 [*/]              return 'MULTIPLICATIVE_OPERATOR'
@@ -99,28 +103,45 @@ function BinaryExpression(left, operator, right) {
  * Creates logical expression node.
  */
 function LogicalExpression(left, operator, right) {
-  // Implement here...
+  return {
+    type: 'LogicalExpression',
+    operator,
+    left,
+    right,
+  };
 }
 
 /**
  * Creates an unary expression node.
  */
 function UnaryExpression(operator, argument) {
-  // Implement here...
+  return {
+    type: 'UnaryExpression',
+    operator,
+    argument,
+  };
 }
 
 /**
  * Creates an MemberExpression node.
  */
 function MemberExpression(object, property) {
-  // Implement here...
+  return {
+    type: 'MemberExpression',
+    object,
+    property,
+  };
 }
 
 /**
  * Creates an CallExpression node.
  */
 function CallExpression(callee, args) {
-  // Implement here...
+  return {
+    type: 'CallExpression',
+    callee,
+    arguments: args,
+  }
 }
 
 /**
@@ -234,7 +255,14 @@ IterationStatement
  * While loop.
  */
 WhileStatement
-  : // Implement here...
+  : WHILE '(' Expression ')' Statement
+    {
+      $$ = {
+        type: 'WhileStatement',
+        test: $3,
+        body: $5,
+      }
+    }
   ;
 
 /**
@@ -279,7 +307,10 @@ VariableInitializer
  * If statement.
  */
 IfStatement
-  : // Implement here...
+  : IF '(' Expression ')' Statement %prec THEN
+    { $$ = IfStatement($3, $5) }
+  | IF '(' Expression ')' Statement ELSE Statement
+    { $$ = IfStatement($3, $5, $7) }
   ;
 
 /**
@@ -293,7 +324,13 @@ FunctionDeclaration
  * Identifier (variables, properties).
  */
 Identifier
-  : // Implement here...
+  : IDENTIFIER
+    {
+      $$ = {
+        type: 'Identifier',
+        value: $1,
+      }
+    }
   ;
 
 /**
@@ -309,7 +346,10 @@ OptFormalParameterList
  * Formal parameters.
  */
 FormalParameterList
-  : // Implement here...
+  : Identifier
+    { $$ = [$1] }
+  | FormalParameterList ',' Identifier
+    { $1.push($3); $$ = $1 }
   ;
 
 /**
@@ -345,7 +385,12 @@ ExpressionStatement
  * Empty statement.
  */
 EmptyStatement
-  : // Implement here...
+  : ';'
+    {
+      $$ = {
+        type: 'EmptyStatement',
+      }
+    }
   ;
 
 /**
@@ -383,7 +428,16 @@ Expression
  * x -= y
  */
 AssignmentExpression
-  : // Implement here...
+  : LogicalORExpression
+  | LeftHandSideExpression AssignmentOperator AssignmentExpression
+    {
+      $$ = {
+        type: 'AssignmentExpression',
+        left: $1,
+        operator: $2,
+        right: $3,
+      }
+    }
   ;
 
 /**
@@ -397,20 +451,53 @@ AssignmentExpression
  */
 LeftHandSideExpression
   : MemberExpression
+  | CallExpression
+  ;
+
+CallExpression
+  : CallMemberExpression
+  | CallExpression Arguments
+    { $$ = CallExpression($1, $2) }
+  ;
+
+/**
+ * CallMemberExpression
+ */
+CallMemberExpression
+  : MemberExpression Arguments
+    { $$ = CallExpression($1, $2) }
+  | Super Arguments
+    { $$ = CallExpression($1, $2) }
+  ;
+
+/**
+ * Super expression.
+ */
+Super
+  : // Implement here...
   ;
 
 /**
  * MemberExpression.
  */
 MemberExpression
-  : // Implement here...
+  : PrimaryExpression
+  | MemberExpression '.' Identifier
+    { $$ = MemberExpression($1, $3) }
+  | MemberExpression '[' Expression ']'
+    { $$ = MemberExpression($1, $3) }
   ;
 
 /**
  * This expression.
  */
 ThisExpression
-  : // Implement here...
+  : THIS
+    {
+      $$ = {
+        type: 'ThisExpression',
+      }
+    }
   ;
 
 /**
@@ -427,7 +514,9 @@ AssignmentOperator
  * x || y
  */
 LogicalORExpression
-  : // Implement here...
+  : LogicalANDExpression
+  | LogicalORExpression LOGICAL_OR LogicalANDExpression
+      { $$ = LogicalExpression($1, $2, $3) }
   ;
 
 /**
@@ -436,7 +525,9 @@ LogicalORExpression
  * x && y
  */
 LogicalANDExpression
-  : // Implement here...
+  : EqualityExpression
+  | LogicalANDExpression LOGICAL_AND EqualityExpression
+      { $$ = LogicalExpression($1, $2, $3) }
   ;
 
 /**
@@ -448,7 +539,9 @@ LogicalANDExpression
  * x != y
  */
 EqualityExpression
-  : // Implement here...
+  : RelationalExpression
+  | EqualityExpression EQUALITY_OPERATOR RelationalExpression
+    { $$ = BinaryExpression($1, $2, $3) }
   ;
 
 /**
@@ -462,7 +555,9 @@ EqualityExpression
  * x <= y
  */
 RelationalExpression
-  : // Implement here...
+  : AdditiveExpression
+  | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+    { $$ = BinaryExpression($1, $2, $3) }
   ;
 
 /**
@@ -486,7 +581,9 @@ AdditiveExpression
  * x / y
  */
 MultiplicativeExpression
-  : // Implement here...
+  : MultiplicativeExpression MULTIPLICATIVE_OPERATOR UnaryExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  | UnaryExpression
   ;
 
 /**
@@ -497,41 +594,17 @@ MultiplicativeExpression
  * -foo();
  */
 UnaryExpression
-  : // Implement here...
-  ;
-
-/**
- * CallExpression.
- *
- * foo();
- * bar()();
- * super();
- */
-CallExpression
-  : // Implement here...
-  ;
-
-/**
- * Super expression.
- */
-Super
-  : // Implement here...
-  ;
-
-/**
- * Callee.
- *
- * Simple function call `foo();` or chained `foo()();`.
- */
-Callee
-  : // Implement here...
+  : LeftHandSideExpression
+  | ADDITIVE_OPERATOR UnaryExpression
+    { $$ = UnaryExpression($1, $2) }
   ;
 
 /**
  * Arguments of function calls.
  */
 Arguments
-  : // Implement here...
+  : '(' OptArgumentList ')'
+    { $$ = $2 }
   ;
 
 /**
@@ -557,7 +630,11 @@ ArgumentList
  * Primary expression.
  */
 PrimaryExpression
-  : // Implement here...
+  : Literal
+  | Identifier
+  | ThisExpression
+  | NewExpression
+  | ParenthesizedExpression
   ;
 
 /**
